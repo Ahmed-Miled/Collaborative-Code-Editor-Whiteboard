@@ -71,3 +71,43 @@ exports.rejectInvitation = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+// Update user
+exports.updateUser = async (req, res) => {
+  try {
+    const { username, email, role } = req.body;
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Update only provided fields
+    if (username) user.username = username;
+    if (email) user.email = email;
+
+    await user.save();
+    res.json({ message: 'User updated successfully', user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Delete user
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Remove user from all rooms they belong to
+    await Room.updateMany(
+      { collaborators: user._id },
+      { $pull: { collaborators: user._id } }
+    );
+
+    await user.remove();
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

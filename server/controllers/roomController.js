@@ -1,5 +1,5 @@
-const Room = require('../models/Room');
-const User = require('../models/User');
+const Room = require("../models/Room");
+const User = require("../models/User");
 
 // Create a room
 exports.createRoom = async (req, res) => {
@@ -8,8 +8,9 @@ exports.createRoom = async (req, res) => {
   try {
     // i have to chekc if the room already existe with that name or not ?
     const roomExists = await Room.findOne({ name });
-    if (roomExists) return res.status(400).json({ message: 'Room name already exists' });
-    
+    if (roomExists)
+      return res.status(400).json({ message: "Room name already exists" });
+
     const room = await Room.create({ name, owner });
     // add room to owner's rooms
     const user = await User.findById(owner);
@@ -30,44 +31,92 @@ exports.createRoom = async (req, res) => {
 exports.getRoom = async (req, res) => {
   try {
     const room = await Room.findById(req.params.id);
-    if (!room) return res.status(404).json({ message: 'Slected Room not found' });
+    if (!room)
+      return res.status(404).json({ message: "Slected Room not found" });
     res.json(room);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-exports.getAllRooms = async (req, res) =>{
-  try{
+exports.getAllRooms = async (req, res) => {
+  try {
     const rooms = await Room.find();
-    if (!rooms) return res.status(404).json({ message: 'Rooms not found' });
+    if (!rooms) return res.status(404).json({ message: "Rooms not found" });
     res.json(rooms);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}
-
+};
 
 exports.inviteUser = async (req, res) => {
   try {
     const { roomId } = req.params;
     const { userId } = req.body;
-    
-    const room = await Room.findById(roomId);
-    if (!room) return res.status(404).json({ message: 'Room not found' });
 
-    // Check if requester is owner
-    //if (room.owner.toString() !== req.ownerId)
-    //  return res.status(403).json({ message: 'Only owner can invite users' });
+    const room = await Room.findById(roomId);
+    if (!room) return res.status(404).json({ message: "Room not found" });
+
+    if (room.owner.toString() !== req.userId)
+      return res.status(403).json({ message: "Only owner can invite users" });
 
     const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: 'User to invite not found' });
+    if (!user)
+      return res.status(404).json({ message: "User to invite not found" });
+
+    // Prevent duplicate invitations
+    if (user.invitations.some((inv) => inv.room.toString() === roomId)) {
+      return res.status(400).json({ message: "User already invited" });
+    }
 
     // Add invitation to user
-    user.invitations.push({ room: roomId, invitedBy: req.ownerId });
+    user.invitations.push({ room: roomId, invitedBy: req.userId });
     await user.save();
 
     res.json({ message: `User ${user.username} invited to room ${room.name}` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.updateRoomName = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+    const { name } = req.body;
+
+    const room = await Room.findById(roomId);
+    if (!room) return res.status(404).json({ message: "Room not found" });
+
+    if (room.owner.toString() !== req.userId)
+      return res
+        .status(403)
+        .json({ message: "Only owner can update room name" });
+
+    room.name = name;
+    await room.save();
+
+    res.json({ message: "Room name updated", room });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deleteRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+
+    const room = await Room.findById(roomId);
+    if (!room) return res.status(404).json({ message: "Room not found" });
+
+    if (room.owner.toString() !== req.userId)
+      return res.status(403).json({ message: "Only owner can delete room" });
+    await User.updateMany(
+      { _id: { $in: room.collaborators } },
+      { $pull: { rooms: room._id } }
+    );
+
+    await room.remove();
+    res.json({ message: "Room deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
