@@ -5,6 +5,9 @@ const server = http.createServer(app);
 const { connectDB } = require('./config/db'); // use require
 const authRoutes = require('./routes/auth');
 const roomRoutes = require('./routes/rooms');
+//const listUsersRouter = require('./routes/userRoutes');
+const userRoutes = require('./routes/userRoutes');
+
 const { Server } = require('socket.io');
 
 connectDB();
@@ -14,6 +17,9 @@ const io = new Server(server, {
 });
 
 app.use(express.json());
+
+app.use('/users', userRoutes);
+
 app.use('/auth', authRoutes);
 app.use('/rooms', roomRoutes);
 
