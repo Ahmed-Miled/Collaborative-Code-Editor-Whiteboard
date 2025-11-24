@@ -31,6 +31,22 @@ const UserSchema = new mongoose.Schema({
       ref: 'Room', // reference to Room model
     },
   ],
+  invitations: [
+    {
+      room: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Room',
+      },
+      invitedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      }
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
