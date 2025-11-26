@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // Register new user
+
 exports.register = async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -12,15 +13,28 @@ exports.register = async (req, res) => {
 
   try {
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ message: 'Email already registered' });
+    if (existingUser) 
+      return res.status(400).json({ message: 'Email already registered' });
 
-    
+    const existingUsername = await User.findOne({ username });
+    if (existingUsername) 
+      return res.status(400).json({ message: 'Username already registered' });
+
     const user = await User.create({ username, email, password });
 
-    res.status(201).json({ 
+    const token = jwt.sign(
+      { id: user._id, username: user.username, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    );
+
+    // send back token and user info
+    res.status(201).json({
       message: 'User created successfully',
+      token, 
       user: { id: user._id, username, email }
     });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
