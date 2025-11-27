@@ -1,10 +1,13 @@
 import NavBar from "../components/NavBar"
+import SideBar from "../components/SideBar"
+import Document from "../components/Document"
 
 function HomePage(){
   return (
     <div>
       <NavBar/>
-      <h1>HomePage</h1>
+      <SideBar />
+      <Document />
     </div>
   )
 }

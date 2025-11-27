@@ -9,7 +9,7 @@ function NavBar(){
 
 
   return(
-    <div>
+    <div className="navbar">
       <h1>navigation bar</h1>
       <button onClick={handleLogout}>Logout</button>
     </div>

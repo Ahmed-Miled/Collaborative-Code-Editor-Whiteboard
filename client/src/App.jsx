@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import '../styles/App.css'
+import "../styles/styleAuth.css";
 
 import ProtectedRoute from './components/ProtectedRoute'
 
