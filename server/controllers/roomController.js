@@ -1,17 +1,18 @@
 const Room = require("../models/Room");
 const User = require("../models/User");
+const Document = require("../models/Document");
 
-// Create a room
 exports.createRoom = async (req, res) => {
-  const { name, owner } = req.body;
+  const { name } = req.body;
+  const owner = req.user.id; // get owner from JWT token
 
   try {
-    // i have to chekc if the room already existe with that name or not ?
-    const roomExists = await Room.findOne({ name });
+    const roomExists = await Room.findOne({ name, owner }); 
     if (roomExists)
       return res.status(400).json({ message: "Room name already exists" });
 
     const room = await Room.create({ name, owner });
+
     // add room to owner's rooms
     const user = await User.findById(owner);
     user.rooms.push(room._id);
@@ -21,9 +22,9 @@ exports.createRoom = async (req, res) => {
     room.collaborators.push(user._id);
     await room.save();
 
-    res.json(room);
+    res.json(room); // this is the object returned to frontend
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 
@@ -38,14 +39,20 @@ exports.getRoom = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 exports.getAllRooms = async (req, res) => {
   try {
-    const rooms = await Room.find();
-    if (!rooms) return res.status(404).json({ message: "Rooms not found" });
+    const rooms = await Room.find({
+      $or: [
+        { owner: req.user.id }, // rooms this user owns
+        { collaborators: req.user.id }, // rooms this user collaborates on
+      ],
+    }).populate("documents"); // optional, populate document info
+
+    if (!rooms || rooms.length === 0) return res.status(200).json([]); // return empty array if none
+
     res.json(rooms);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
 

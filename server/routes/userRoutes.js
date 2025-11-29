@@ -5,7 +5,7 @@ const auth = require("../middleware/auth");
 
 // GET /users
 router.get("/", auth, usersController.getUsers);
-router.get("/:id", auth, usersController.getUser);
+router.get("/me", auth, usersController.getUser);
 router.get("/:id/getInvitations", auth, usersController.getInvitations);
 router.post("/:id/invitations/:roomId/accept", auth, usersController.acceptInvitation);
 router.post("/:id/invitations/:roomId/reject", auth, usersController.rejectInvitation);

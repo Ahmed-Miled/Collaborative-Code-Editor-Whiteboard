@@ -1,6 +1,6 @@
 function Document() {
   return (
-    <div>
+    <div className="document">
       <h1>Document</h1>
     </div>
   )
