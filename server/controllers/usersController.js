@@ -19,20 +19,24 @@ exports.getUser = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 exports.getInvitations = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findById(req.user.id)
+      .populate("invitations.room", "name")
+      .populate("invitations.invitedBy", "username email");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
     res.json(user.invitations);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+
 exports.acceptInvitation = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.user.id);
     const roomId = req.params.roomId;
 
     // Check if invitation exists
@@ -59,8 +63,11 @@ exports.acceptInvitation = async (req, res) => {
 
 exports.rejectInvitation = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.user.id);
     const roomId = req.params.roomId;
+console.log("Rejecting invitation for user:", req.user);
+console.log("RoomId:", req.params.roomId);
+
 
     // Remove the invitation if it exists
     user.invitations = user.invitations.filter(inv => inv.room.toString() !== roomId);

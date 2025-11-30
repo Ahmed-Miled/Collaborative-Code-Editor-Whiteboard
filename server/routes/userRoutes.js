@@ -6,8 +6,17 @@ const auth = require("../middleware/auth");
 // GET /users
 router.get("/", auth, usersController.getUsers);
 router.get("/me", auth, usersController.getUser);
-router.get("/:id/getInvitations", auth, usersController.getInvitations);
-router.post("/:id/invitations/:roomId/accept", auth, usersController.acceptInvitation);
-router.post("/:id/invitations/:roomId/reject", auth, usersController.rejectInvitation);
+router.get("/me/getInvitations", auth, usersController.getInvitations);
+router.put(
+  "/me/invitations/:roomId/accept",
+  auth,
+  usersController.acceptInvitation
+);
+
+router.put(
+  "/me/invitations/:roomId/reject",
+  auth,
+  usersController.rejectInvitation
+);
 
 module.exports = router;

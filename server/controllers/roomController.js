@@ -60,7 +60,6 @@ exports.inviteUser = async (req, res) => {
   try {
     const { roomId } = req.params;
     const { userId } = req.body;
-
     const room = await Room.findById(roomId);
     if (!room) return res.status(404).json({ message: "Room not found" });
 

@@ -68,3 +68,66 @@ export async function getUser(token) {
   if (!res.ok) throw new Error(data.message || "Failed to get user from api");
   return data;
 }
+
+
+
+export async function getNotifications(token) {
+  const res = await fetch(`${API_URL}/users/me/getInvitations`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Failed to get notifications");
+  return data;
+}
+ export async function rejectInvitation(roomId) {
+   const token = localStorage.getItem("token");
+   const res = await fetch(`${API_URL}/users/me/invitations/${roomId}/reject`, {
+     method: "PUT",
+     headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${token}`,
+     },
+   });
+
+   const data = await res.json();
+   if (!res.ok) throw new Error(data.message || "Failed to reject invitation");
+   return data;
+ }
+
+ export async function acceptInvitation(roomId) {
+   const token = localStorage.getItem("token");
+   const res = await fetch(`${API_URL}/users/me/invitations/${roomId}/accept`, {
+     method: "PUT",
+     headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${token}`,
+     },
+   });
+
+   const data = await res.json();
+   if (!res.ok) throw new Error(data.message || "Failed to accept invitation");
+   return data;
+ }
+
+
+ export async function inviteUser(roomId, userId) {
+   const token = localStorage.getItem("token");
+
+   const res = await fetch(`${API_URL}/rooms/${roomId}/invite`, {
+     method: "POST",
+     headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${token}`,
+     },
+     body: JSON.stringify({ userId }),
+   });
+
+   const data = await res.json();
+   if (!res.ok) throw new Error(data.message || "Failed to invite user");
+   return data;
+ }
