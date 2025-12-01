@@ -34,8 +34,8 @@ function NavBar() {
 
     loadNotifications();
 
-    // Optional: poll every 10-15 sec for new notifications
-    const interval = setInterval(loadNotifications, 15000);
+    // poll every 1/2 sec for new notifications
+    const interval = setInterval(loadNotifications, 500);
     return () => clearInterval(interval);
   }, []);
   async function handleNotifications() {

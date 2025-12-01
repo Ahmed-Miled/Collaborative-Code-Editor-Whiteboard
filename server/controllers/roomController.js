@@ -7,7 +7,7 @@ exports.createRoom = async (req, res) => {
   const owner = req.user.id; // get owner from JWT token
 
   try {
-    const roomExists = await Room.findOne({ name, owner }); 
+    const roomExists = await Room.findOne({ name, owner });
     if (roomExists)
       return res.status(400).json({ message: "Room name already exists" });
 
@@ -74,6 +74,15 @@ exports.inviteUser = async (req, res) => {
     if (user.invitations.some((inv) => inv.room.toString() === roomId)) {
       return res.status(400).json({ message: "User already invited" });
     }
+    // User is already in the room
+    if (
+      room.collaborators.some(
+        (memberId) => memberId.toString() === user._id.toString()
+      )
+    ) {
+      return res.status(400).json({ message: "User is already in the room" });
+    }
+
 
     // Add invitation to user
     user.invitations.push({ room: roomId, invitedBy: req.userId });
