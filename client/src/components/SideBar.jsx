@@ -92,18 +92,16 @@ function SideBar({ selectedRoom, setSelectedRoom }) {
                 <span className="room-name">{room.name}</span>
               </div>
 
-              {room.owner === userId && (
                 <button
                   className="invite-btn"
                   // this btn should add a document to the room
                   /*onClick={(e) => {
                     e.stopPropagation(); // prevent toggling room
-                    handleInviteUser(room);
+                    handleAddDocument(room);
                   }}*/
                 >
                   +
                 </button>
-              )}
             </div>
 
             {openRoom === room._id && (

@@ -17,22 +17,6 @@
   font-size: 28px;
   color: #4e54c8;
 }
-
-.edit-room-btn {
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: none;
-  background: #52d681;
-  color: #0f1d0f;
-  cursor: pointer;
-  font-weight: 500;
-  transition: 0.2s;
-}
-
-.edit-room-btn:hover {
-  background: #41c573;
-}
-
 .collaborators-section, .documents-section {
   margin-bottom: 25px;
 }
@@ -173,20 +157,54 @@
   color: white;
 }
 
-
-
-.invite-user-btn {
-  margin-left: 10px;
-  padding: 5px 12px;
-  background-color: #4caf50;
+  .invite-user-btn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #4CAF50, #3ea344);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.25);
 }
 
 .invite-user-btn:hover {
-  background-color: #45a049;
+  background: linear-gradient(135deg, #54d15f, #42bb4b);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(76, 175, 80, 0.35);
+}
+
+.invite-user-btn:active {
+  transform: scale(0.97);
+}
+
+.edit-room-btn {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #4CAF50, #3ea344);;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 10px rgba(82, 214, 129, 0.25);
+}
+
+.edit-room-btn:hover {
+  background: linear-gradient(135deg, #61e892, #4fce7e);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(82, 214, 129, 0.35);
+}
+
+.edit-room-btn:active {
+  transform: scale(0.97);
+}
+
+
+.invite-user-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(76, 175, 80, 0.35);
 }
 
 .members-header {
