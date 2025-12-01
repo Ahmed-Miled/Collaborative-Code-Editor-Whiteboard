@@ -11,25 +11,42 @@ function NavBar() {
   const [username, setUsername] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [openNotif, setOpenNotif] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
     window.location.href = "/";
   };
 
-  async function handleNotifications() {
+  useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log(token);
-    if (token) {
+    if (!token) return;
+
+    async function loadNotifications() {
       try {
         const data = await getNotifications(token);
         setNotifications(data);
-        console.log(data);
-        setOpenNotif(!openNotif); // toggle dropdown
+        setHasUnread(data.length > 0); // show dot if there are notifications
       } catch (err) {
         console.log("Failed to load notifications", err);
       }
     }
+
+    loadNotifications();
+
+    // Optional: poll every 10-15 sec for new notifications
+    const interval = setInterval(loadNotifications, 15000);
+    return () => clearInterval(interval);
+  }, []);
+  async function handleNotifications() {
+    setOpenNotif(!openNotif);
+
+    // If opening, mark notifications as read
+    if (!openNotif) {
+      setHasUnread(false);
+    }
   }
+
   // Load username
   useEffect(() => {
     async function loadUserName() {
@@ -74,10 +91,23 @@ function NavBar() {
       </div>
 
       <div className="right">
-        {/* Toggle menu on click */}
+        {/* Toggle menu on click 
+        
         <button className="btn-outline" onClick={handleNotifications}>
           Notifications
         </button>
+        */}
+        <div className="notif-btn-wrapper">
+          <button
+            className={`btn-outline ${openNotif ? "active" : ""}`}
+            onClick={handleNotifications}
+          >
+            Notifications
+          </button>
+
+          {/* New notifications indicator */}
+          {hasUnread && <span className="notif-indicator"></span>}
+        </div>
 
         {/* Dropdown menu */}
         {openNotif && (

@@ -83,11 +83,14 @@ function SideBar() {
         {rooms.map((room) => (
           <li key={room._id} className="room-item">
             <div className="room-header" onClick={() => toggleRoom(room._id)}>
-              <span className={`arrow ${openRoom === room._id ? "open" : ""}`}>
-                ▶
-              </span>
-              <span className="room-name">{room.name}</span>
-
+              <div>
+                <span
+                  className={`arrow ${openRoom === room._id ? "open" : ""}`}
+                >
+                  ▶
+                </span>
+                <span className="room-name">{room.name}</span>
+              </div>
               {/* Only show "+" if logged-in user is owner */}
 
               {room.owner === userId && (

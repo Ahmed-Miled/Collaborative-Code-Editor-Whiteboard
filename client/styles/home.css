@@ -133,9 +133,9 @@
 .room-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   cursor: pointer;
-
   padding: 10px;
   border-radius: 8px;
 
@@ -330,4 +330,60 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+
+
+.invite-btn {
+  background: linear-gradient(90deg, #6a11cb, #2575fc); /* vibrant gradient */
+  color: #fff; /* text color */
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.invite-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.invite-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.invite-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+
+/* Wrapper for positioning indicator */
+.notif-btn-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Active state when dropdown is open */
+.btn-outline.active {
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Small circle for new notifications */
+.notif-indicator {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 10px;
+  height: 10px;
+  background: #ff4d4f; /* red for new notifications */
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0,0,0,0.3);
 }
