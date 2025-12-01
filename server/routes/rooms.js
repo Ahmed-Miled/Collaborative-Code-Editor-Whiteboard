@@ -14,5 +14,6 @@ router.post('/:roomId/invite', auth, roomController.inviteUser);
 
 router.post('/:roomId/updateRoomName', auth, roomController.updateRoomName);
 router.post('/:roomId/delete', auth, roomController.deleteRoom);
+router.delete("/:roomId/remove/:userId", auth, roomController.removeUserFromRoom);
 
 module.exports = router;

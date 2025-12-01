@@ -387,3 +387,11 @@
   border-radius: 50%;
   box-shadow: 0 0 4px rgba(0,0,0,0.3);
 }
+
+.empty-room {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.2rem;
+  color: #888;
+}

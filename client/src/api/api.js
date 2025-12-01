@@ -131,3 +131,34 @@ export async function getNotifications(token) {
    if (!res.ok) throw new Error(data.message || "Failed to invite user");
    return data;
  }
+
+ export async function updateRoomName(roomId, name, token) {
+   const res = await fetch(`${API_URL}/rooms/${roomId}/updateRoomName`, {
+     method: "POST",
+     headers: {
+       "Content-Type": "application/json",
+       Authorization: `Bearer ${token}`,
+     },
+     body: JSON.stringify({ name }),
+   });
+
+   if (!res.ok) throw new Error("Failed to update room name");
+
+   return await res.json();
+ }
+
+export async function removeUser(userId, roomId, token) {
+  const response = await fetch(`${API_URL}/rooms/${roomId}/remove/${userId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to remove user");
+  }
+
+  return response.json();
+}

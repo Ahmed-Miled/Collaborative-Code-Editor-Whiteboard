@@ -13,14 +13,17 @@ function HomePage() {
     <div className="home">
       <NavBar />
       <SideBar selectedRoom={selectedRoom} setSelectedRoom={setSelectedRoom} />
-
+      {!selectedRoom && !selectedDocument &&(
+      <div className="room-details empty-room">
+        <p>Please select a room to see its details.</p>
+      </div>
+      )}
       {selectedRoom && (
         <RoomDetails
           selectedRoom={selectedRoom}
           setSelectedDocument={setSelectedDocument}
         />
       )}
-
       {selectedDocument && <DocumentEditor document={selectedDocument} />}
     </div>
   );

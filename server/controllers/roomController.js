@@ -134,15 +134,39 @@ exports.deleteRoom = async (req, res) => {
       { _id: { $in: room.collaborators } },
       { $pull: { rooms: room._id } }
     );
-    /*
-   await User.updateMany(
-     { _id: { $in: room.collaborators.map((c) => c.user) } },
-     { $pull: { rooms: room._id } }
-   );*/
 
     await room.remove();
     res.json({ message: "Room deleted" });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+};
+
+
+exports.removeUserFromRoom = async (req, res) => {
+  const { roomId, userId } = req.params;
+
+  try {
+    const room = await Room.findById(roomId);
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    // Only room owner can remove users
+    if (req.user.id !== room.owner.toString()) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    // Remove collaborator
+    room.collaborators = room.collaborators.filter(
+      (id) => id.toString() !== userId
+    );
+
+    await room.save();
+
+    res.json({ message: "User removed successfully", room });
+  } catch (err) {
+    console.error("Error removing user:", err);
+    res.status(500).json({ message: "Server error" });
   }
 };
