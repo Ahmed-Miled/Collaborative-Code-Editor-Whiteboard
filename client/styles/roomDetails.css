@@ -1,0 +1,121 @@
+.room-details {
+  padding: 25px;
+  background: #f9f9f9;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  overflow-y: auto;
+}
+
+.room-header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.room-header-section .room-name {
+  font-size: 28px;
+  color: #4e54c8;
+}
+
+.edit-room-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #52d681;
+  color: #0f1d0f;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.2s;
+}
+
+.edit-room-btn:hover {
+  background: #41c573;
+}
+
+.collaborators-section, .documents-section {
+  margin-bottom: 25px;
+}
+
+.collaborators-list, .documents-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+}
+
+.collaborator-item, .document-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(0,0,0,0.03);
+  margin-bottom: 8px;
+  transition: 0.2s;
+}
+
+.collaborator-item:hover, .document-item:hover {
+  background: rgba(0,0,0,0.08);
+}
+
+.remove-user-btn, .edit-doc-btn, .delete-doc-btn, .create-doc-btn {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.remove-user-btn {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.remove-user-btn:hover {
+  background: #e25757;
+}
+
+.edit-doc-btn {
+  background: #52d681;
+  color: #0f1d0f;
+}
+
+.edit-doc-btn:hover {
+  background: #41c573;
+}
+
+.delete-doc-btn {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.delete-doc-btn:hover {
+  background: #e25757;
+}
+
+.create-doc-btn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #4e54c8;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.create-doc-btn:hover {
+  background: #6369d1;
+}
+
+.empty-docs {
+  font-style: italic;
+  color: rgba(0,0,0,0.5);
+}
+
+.room-created {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.5); /* light gray for subtlety */
+  margin-top: 4px;
+  font-style: italic;
+}

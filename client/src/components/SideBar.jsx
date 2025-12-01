@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { getRooms, createRoom, inviteUser, getUser } from "../api/api";
 
-function SideBar() {
+function SideBar({ selectedRoom, setSelectedRoom }) {
   const [rooms, setRooms] = useState([]);
   const [openRoom, setOpenRoom] = useState(null);
-  const [userId, setUserId] = useState(null); // optional if you store current user info
+  const [userId, setUserId] = useState(null); 
 
   useEffect(() => {
     async function loadRooms() {
@@ -81,8 +81,19 @@ function SideBar() {
 
       <ul className="room-list">
         {rooms.map((room) => (
-          <li key={room._id} className="room-item">
-            <div className="room-header" onClick={() => toggleRoom(room._id)}>
+          <li
+            key={room._id}
+            className={`room-item ${
+              selectedRoom?._id === room._id ? "active" : ""
+            }`}
+          >
+            <div
+              className="room-header"
+              onClick={() => {
+                toggleRoom(room._id);
+                setSelectedRoom(room);
+              }}
+            >
               <div>
                 <span
                   className={`arrow ${openRoom === room._id ? "open" : ""}`}
@@ -91,7 +102,6 @@ function SideBar() {
                 </span>
                 <span className="room-name">{room.name}</span>
               </div>
-              {/* Only show "+" if logged-in user is owner */}
 
               {room.owner === userId && (
                 <button

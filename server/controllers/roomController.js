@@ -20,6 +20,8 @@ exports.createRoom = async (req, res) => {
 
     // add owner to collaborators
     room.collaborators.push(user._id);
+    //room.collaborators.push({ user: user._id, joinedAt: new Date() });
+
     await room.save();
 
     res.json(room); // this is the object returned to frontend
@@ -45,8 +47,12 @@ exports.getAllRooms = async (req, res) => {
       $or: [
         { owner: req.user.id }, // rooms this user owns
         { collaborators: req.user.id }, // rooms this user collaborates on
+        //{ "collaborators.user": req.user.id },
       ],
-    }).populate("documents"); // optional, populate document info
+    })
+      .populate("documents") // optional, populate document info
+      .populate("collaborators", "_id username");
+    //.populate("collaborators.user", "_id username");
 
     if (!rooms || rooms.length === 0) return res.status(200).json([]); // return empty array if none
 
@@ -82,7 +88,6 @@ exports.inviteUser = async (req, res) => {
     ) {
       return res.status(400).json({ message: "User is already in the room" });
     }
-
 
     // Add invitation to user
     user.invitations.push({ room: roomId, invitedBy: req.userId });
@@ -129,6 +134,11 @@ exports.deleteRoom = async (req, res) => {
       { _id: { $in: room.collaborators } },
       { $pull: { rooms: room._id } }
     );
+    /*
+   await User.updateMany(
+     { _id: { $in: room.collaborators.map((c) => c.user) } },
+     { $pull: { rooms: room._id } }
+   );*/
 
     await room.remove();
     res.json({ message: "Room deleted" });

@@ -49,6 +49,7 @@ exports.acceptInvitation = async (req, res) => {
     //add user to collabporator list of room
     const room = await Room.findById(roomId);
     room.collaborators.push(user._id);
+    //room.collaborators.push({ _id: user._id, joinedAt: new Date() });
     await room.save();
 
     // Remove invitation
@@ -100,6 +101,7 @@ exports.updateUser = async (req, res) => {
 };
 
 // Delete user
+/*
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -118,3 +120,4 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+*/

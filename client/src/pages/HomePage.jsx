@@ -1,16 +1,29 @@
-import NavBar from "../components/NavBar"
-import SideBar from "../components/SideBar"
-import Document from "../components/Document"
-import '../../styles/home.css'
+import { useState } from "react";
+import NavBar from "../components/NavBar";
+import SideBar from "../components/SideBar";
+import RoomDetails from "../components/RoomDetails";
+import DocumentEditor from "../components/DocumentEditor";
+import "../../styles/home.css";
 
-function HomePage(){
+function HomePage() {
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+
   return (
     <div className="home">
-      <NavBar/>
-      <SideBar />
-      <Document />
+      <NavBar />
+      <SideBar selectedRoom={selectedRoom} setSelectedRoom={setSelectedRoom} />
+
+      {selectedRoom && (
+        <RoomDetails
+          selectedRoom={selectedRoom}
+          setSelectedDocument={setSelectedDocument}
+        />
+      )}
+
+      {selectedDocument && <DocumentEditor document={selectedDocument} />}
     </div>
-  )
+  );
 }
 
-export default HomePage
+export default HomePage;
