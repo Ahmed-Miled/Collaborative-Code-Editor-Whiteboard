@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getRooms, createRoom, inviteUser, getUser } from "../api/api";
+import { getRooms, createRoom, getUser } from "../api/api";
 
 function SideBar({ selectedRoom, setSelectedRoom }) {
   const [rooms, setRooms] = useState([]);
@@ -46,19 +46,7 @@ function SideBar({ selectedRoom, setSelectedRoom }) {
       });
   };
 
-  // New: handle invite button click
-  const handleInviteUser = async (room) => {
-    const userId = prompt("Enter the ID of the user to invite:");
-    if (!userId) return;
-
-    try {
-      const res = await inviteUser(room._id, userId);
-      alert(res.message);
-    } catch (err) {
-      alert(err.message || "Failed to invite user");
-      console.error(err);
-    }
-  };
+  
   useEffect(() => {
     const loadUserId = async () => {
       try {
@@ -81,6 +69,7 @@ function SideBar({ selectedRoom, setSelectedRoom }) {
 
       <ul className="room-list">
         {rooms.map((room) => (
+          console.log("Room:", room),
           <li
             key={room._id}
             className={`room-item ${
@@ -106,10 +95,11 @@ function SideBar({ selectedRoom, setSelectedRoom }) {
               {room.owner === userId && (
                 <button
                   className="invite-btn"
-                  onClick={(e) => {
+                  // this btn should add a document to the room
+                  /*onClick={(e) => {
                     e.stopPropagation(); // prevent toggling room
                     handleInviteUser(room);
-                  }}
+                  }}*/
                 >
                   +
                 </button>

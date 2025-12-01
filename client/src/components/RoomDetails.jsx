@@ -1,13 +1,12 @@
 import "../../styles/roomDetails.css";
 import { useEffect, useState } from "react";
-import { getUser, updateRoomName, removeUser } from "../api/api";
+import { getUser, updateRoomName, removeUser, inviteUser } from "../api/api";
 function RoomDetails({ selectedRoom, onSelectDocument }) {
   const [userId, setUserId] = useState(null);
   const [collaborators, setCollaborators] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState(selectedRoom.name);
   const token = localStorage.getItem("token");
-
 
   useEffect(() => {
     async function loadUserId() {
@@ -72,33 +71,34 @@ function RoomDetails({ selectedRoom, onSelectDocument }) {
     </div>
   );
 
-
   useEffect(() => {
     if (selectedRoom) {
       setCollaborators(selectedRoom.collaborators);
     }
   }, [selectedRoom]);
-/*
-  async function handleRemoveUser(userId, roomId) {
-    try {
-      await removeUser(userId, roomId, token);
-      window.dispatchEvent(new Event("reloadRooms"));
-    } catch (err) {
-      console.error("Failed to remove user:", err);
-    }
-  }*/
 
   async function handleRemoveUser(userId, roomId) {
     try {
       await removeUser(userId, roomId, token);
-
-      // ONLY update collaborators locally
       setCollaborators((prev) => prev.filter((u) => u._id !== userId));
     } catch (err) {
       console.error("Failed to remove user:", err);
     }
   }
 
+  const handleInviteUser = async () => {
+    const userIdToInvite = prompt("Enter the ID of the user to invite:");
+    if (!userIdToInvite) return;
+
+    try {
+      const res = await inviteUser(selectedRoom._id, userIdToInvite);
+      alert(res.message);
+      window.dispatchEvent(new Event("reloadRooms"));
+    } catch (err) {
+      alert(err.message || "Failed to invite user");
+      console.error(err);
+    }
+  };
 
   return (
     <div className="room-details">
@@ -109,9 +109,6 @@ function RoomDetails({ selectedRoom, onSelectDocument }) {
         <p className="room-created">
           Created on: {new Date(selectedRoom.createdAt).toLocaleDateString()}
         </p>
-        {/*selectedRoom.owner === userId && (
-          <button className="edit-room-btn">Edit Name</button>
-        )*/}
         {selectedRoom.owner === userId && (
           <button className="edit-room-btn" onClick={() => setShowModal(true)}>
             Edit Name
@@ -120,10 +117,18 @@ function RoomDetails({ selectedRoom, onSelectDocument }) {
       </div>
 
       <div className="collaborators-section">
-        <h3>
-          Members:{" "}
-          {collaborators.filter((u) => u._id !== selectedRoom.owner).length}
-        </h3>
+        <div className="members-header">
+          <h3>
+            Members:{" "}
+            {collaborators.filter((u) => u._id !== selectedRoom.owner).length}
+          </h3>
+
+          {selectedRoom.owner === userId && (
+            <button className="invite-user-btn" onClick={handleInviteUser}>
+              + Invite
+            </button>
+          )}
+        </div>
 
         <ul className="collaborators-list">
           {collaborators
@@ -142,33 +147,6 @@ function RoomDetails({ selectedRoom, onSelectDocument }) {
               </li>
             ))}
         </ul>
-
-        {/*<h3>
-          Members:{" "}
-          {
-            selectedRoom.collaborators.filter(
-              (u) => u._id !== selectedRoom.owner
-            ).length
-          }
-        </h3>
-        <ul className="collaborators-list">
-          {selectedRoom.collaborators
-            .filter((user) => user._id !== selectedRoom.owner)
-            .map((user) => (
-              <li key={user._id} className="collaborator-item">
-                {user.username}
-                {/* Only owner can remove }
-                {selectedRoom.owner === userId && (
-                  <button
-                    className="remove-user-btn"
-                    onClick={() => handleRemoveUser(user._id, selectedRoom._id)}
-                  >
-                    Remove
-                  </button>
-                )}
-              </li>
-            ))}
-        </ul>*/}
       </div>
 
       {/* Documents section */}
