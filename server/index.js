@@ -8,6 +8,7 @@ const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/auth');
 const roomRoutes = require('./routes/rooms');
 const userRoutes = require('./routes/userRoutes');
+const documentRoutes = require('./routes/document');
 const { Server } = require('socket.io');
 
 connectDB();
@@ -26,7 +27,7 @@ const io = new Server(server, {
 app.use(express.json());
 
 app.use('/users', userRoutes);
-
+app.use('/documents', documentRoutes);
 app.use('/auth', authRoutes);
 app.use('/rooms', roomRoutes);
 

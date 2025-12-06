@@ -20,6 +20,7 @@ function NavBar() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    console.log("Token:", token);
     if (!token) return;
 
     async function loadNotifications() {
