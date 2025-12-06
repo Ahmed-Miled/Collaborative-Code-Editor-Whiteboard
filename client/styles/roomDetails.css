@@ -212,3 +212,20 @@
   align-items: center;
   justify-content: space-between;
 }
+
+
+.modal-error {
+  color: #ff4a4a;
+  font-size: 14px;
+  margin-top: 8px;
+  animation: shake 0.2s ease-in-out;
+}
+
+/* Shake animation */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-4px); }
+  100% { transform: translateX(0); }
+}
