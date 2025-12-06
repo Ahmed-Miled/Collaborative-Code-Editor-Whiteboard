@@ -1,11 +1,14 @@
+  /* ===== MAIN CONTAINER ===== */
 .room-details {
   padding: 25px;
   background: #f9f9f9;
   border-radius: 14px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
+  height: 100%;
 }
 
+/* ===== ROOM HEADER ===== */
 .room-header-section {
   display: flex;
   justify-content: space-between;
@@ -13,153 +16,107 @@
   margin-bottom: 20px;
 }
 
-.room-header-section .room-name {
+.room-details .room-name {
   font-size: 28px;
   color: #4e54c8;
+  margin: 0;
 }
-.collaborators-section, .documents-section {
+
+.room-created {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.5);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.edit-room-btn {
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #4caf50, #3ea344);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.25);
+}
+
+.edit-room-btn:hover {
+  background: linear-gradient(135deg, #54d15f, #42bb4b);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(76, 175, 80, 0.35);
+}
+
+.edit-room-btn:active {
+  transform: scale(0.97);
+}
+
+/* ===== SECTIONS ===== */
+.collaborators-section,
+.documents-section {
   margin-bottom: 25px;
 }
 
-.collaborators-list, .documents-list {
+.members-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+/* ===== LISTS ===== */
+.collaborators-list,
+.documents-list {
   list-style: none;
   padding: 0;
   margin-top: 10px;
 }
 
-.collaborator-item, .document-item {
+.collaborator-item,
+.room-details .document-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 12px;
+  padding: 12px;
   border-radius: 8px;
-  background: rgba(0,0,0,0.03);
+  background: rgba(0, 0, 0, 0.03);
   margin-bottom: 8px;
-  transition: 0.2s;
+  transition: background 0.2s;
 }
 
-.collaborator-item:hover, .document-item:hover {
-  background: rgba(0,0,0,0.08);
+.collaborator-item:hover,
+.room-details .document-item:hover {
+  background: rgba(0, 0, 0, 0.08);
 }
 
-.remove-user-btn, .edit-doc-btn, .delete-doc-btn, .create-doc-btn {
-  padding: 4px 10px;
-  border-radius: 6px;
-  border: none;
-  font-size: 13px;
-  cursor: pointer;
-  transition: 0.2s;
+.room-details .document-item > div {
+  display: flex;
+  gap: 8px;
 }
 
-.remove-user-btn {
-  background: #ff6b6b;
-  color: #fff;
-}
-
-.remove-user-btn:hover {
-  background: #e25757;
-}
-
-.edit-doc-btn {
-  background: #52d681;
-  color: #0f1d0f;
-}
-
-.edit-doc-btn:hover {
-  background: #41c573;
-}
-
-.delete-doc-btn {
-  background: #ff6b6b;
-  color: #fff;
-}
-
-.delete-doc-btn:hover {
-  background: #e25757;
-}
-
-.create-doc-btn {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background: #4e54c8;
-  color: #fff;
-  border-radius: 8px;
-  cursor: pointer;
+/* ===== DOCUMENT NAME (CLICKABLE) ===== */
+.doc-name-clickable {
+  color: #4e54c8;
   font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+  flex: 1;
 }
 
-.create-doc-btn:hover {
-  background: #6369d1;
+.doc-name-clickable:hover {
+  color: #6369d1;
+  text-decoration: underline;
 }
 
 .empty-docs {
   font-style: italic;
-  color: rgba(0,0,0,0.5);
+  color: rgba(0, 0, 0, 0.5);
 }
 
-.room-created {
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.5); /* light gray for subtlety */
-  margin-top: 4px;
-  font-style: italic;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 10;
-}
-
-.modal-container {
-  background: white;
-  padding: 25px;
-  border-radius: 12px;
-  width: 350px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  animation: fadeIn 0.2s ease-in-out;
-}
-
-.modal-input {
-  width: 100%;
-  padding: 10px;
-  margin: 15px 0;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-.modal-cancel,
-.modal-save {
+/* ===== BUTTONS ===== */
+.invite-user-btn {
   padding: 8px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  border: none;
-}
-
-.modal-cancel {
-  background: #ddd;
-}
-
-.modal-save {
-  background: #3f51b5;
-  color: white;
-}
-
-  .invite-user-btn {
-  padding: 8px 16px;
-  background: linear-gradient(135deg, #4CAF50, #3ea344);
+  background: linear-gradient(135deg, #4caf50, #3ea344);
   color: white;
   border: none;
   border-radius: 10px;
@@ -179,53 +136,246 @@
   transform: scale(0.97);
 }
 
-.edit-room-btn {
-  padding: 8px 18px;
-  border-radius: 10px;
+.remove-user-btn {
+  padding: 6px 12px;
+  background: #ff6b6b;
+  color: #fff;
   border: none;
-  background: linear-gradient(135deg, #4CAF50, #3ea344);;
-  color: white;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.remove-user-btn:hover {
+  background: #e25757;
+  transform: translateY(-1px);
+}
+
+.edit-doc-btn {
+  padding: 6px 12px;
+  background: #0e639c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.edit-doc-btn:hover {
+  background: #1177bb;
+  transform: translateY(-1px);
+}
+
+.delete-doc-btn {
+  padding: 6px 12px;
+  background: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.delete-doc-btn:hover {
+  background: #e25757;
+  transform: translateY(-1px);
+}
+
+.create-doc-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 15px;
+  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 10px rgba(82, 214, 129, 0.25);
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-.edit-room-btn:hover {
-  background: linear-gradient(135deg, #61e892, #4fce7e);
+.create-doc-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(82, 214, 129, 0.35);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-.edit-room-btn:active {
-  transform: scale(0.97);
-}
-
-
-.invite-user-btn:active {
+.create-doc-btn:active {
   transform: translateY(0);
-  box-shadow: 0 3px 8px rgba(76, 175, 80, 0.35);
 }
 
-.members-header {
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
+  z-index: 1000;
+  animation: modalFadeIn 0.2s ease-in-out;
 }
 
+.modal-container {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: modalSlideIn 0.2s ease-out;
+}
 
+.modal-container h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 20px;
+}
+
+/* Modal Inputs */
+.modal-input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.modal-input:focus {
+  border-color: #4e54c8;
+}
+
+.modal-input::placeholder {
+  color: #999;
+}
+
+/* Modal Textarea */
+.modal-textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 14px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.modal-textarea:focus {
+  border-color: #4e54c8;
+}
+
+.modal-textarea::placeholder {
+  color: #999;
+}
+
+/* Modal Select */
+select.modal-input {
+  cursor: pointer;
+}
+
+/* Modal Error */
 .modal-error {
   color: #ff4a4a;
   font-size: 14px;
-  margin-top: 8px;
-  animation: shake 0.2s ease-in-out;
+  margin-bottom: 15px;
+  animation: shake 0.3s ease-in-out;
 }
 
-/* Shake animation */
+/* Modal Actions */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-cancel,
+.modal-save {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.modal-cancel {
+  background: #ddd;
+  color: #333;
+}
+
+.modal-cancel:hover {
+  background: #ccc;
+}
+
+.modal-save {
+  background: #4e54c8;
+  color: white;
+}
+
+.modal-save:hover {
+  background: #6369d1;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalSlideIn {
+  from {
+    transform: translateY(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 @keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  50% { transform: translateX(4px); }
-  75% { transform: translateX(-4px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-4px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }

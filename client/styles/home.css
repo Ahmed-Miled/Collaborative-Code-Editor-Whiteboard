@@ -164,7 +164,7 @@
   font-size: 18px;
 }
 
-/* Document list */
+/* Document list 
 .document-list {
   list-style: none;
   padding-left: 25px;
@@ -181,7 +181,53 @@
 .document-item:hover {
   opacity: 1;
   transform: translateX(3px);
+}*/
+.document-list {
+  list-style: none;
+  padding-left: 20px;
+  margin-top: 8px;
 }
+
+/* Each document item */
+.room-item>.document-list>.document-item {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 8px;
+
+  padding: 8px 12px;
+  margin-bottom: 4px;
+
+  background: rgba(255, 255, 255, 0.05); /* subtle background */
+  border-radius: 6px;
+
+  font-size: 15px;
+  opacity: 0.9;
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+/* File icon */
+.room-item>.document-list>.document-item::before {
+  content: "📄";  /* You can replace with svg later */
+  font-size: 17px;
+}
+
+/* Hover effect */
+.room-item>.document-list>.document-item:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateX(4px);
+}
+
+/* Active/opened file */
+.room-item>.document-list>.document-item.active {
+  background: rgba(255, 255, 255, 0.18);
+  font-weight: 600;
+  opacity: 1;
+}
+
 
 /* ----- CREATE ROOM BUTTON ----- */
 .create-room-btn {
@@ -206,7 +252,7 @@
 .home > .document {
   grid-row: 2;
   grid-column: 2;
-  background-color: #fafafa;
+  background-color: #f9f9f9;
   padding: 20px;
 }
 

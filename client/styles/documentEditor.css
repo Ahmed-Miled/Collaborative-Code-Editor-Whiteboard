@@ -1,0 +1,144 @@
+/* ===== MAIN CONTAINER ===== */
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
+
+/* ===== HEADER ===== */
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background-color: #252526;
+  border-bottom: 1px solid #3e3e42;
+}
+
+.editor-title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.editor-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #cccccc;
+}
+
+.editor-language-badge {
+  padding: 4px 8px;
+  background-color: #0e639c;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.editor-language-select {
+  padding: 6px 12px;
+  background-color: #3c3c3c;
+  color: #cccccc;
+  border: 1px solid #3e3e42;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.2s;
+}
+
+.editor-language-select:hover {
+  background-color: #454545;
+}
+
+.editor-language-select:focus {
+  border-color: #0e639c;
+}
+
+/* ===== MONACO EDITOR CONTAINER ===== */
+.editor-monaco-container {
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ===== EMPTY STATE ===== */
+.editor-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #1e1e1e;
+  color: #d4d4d4;
+}
+
+.editor-empty-content {
+  text-align: center;
+  max-width: 400px;
+  padding: 20px;
+}
+
+.editor-empty-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  color: #6e7681;
+}
+
+.editor-empty-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #cccccc;
+}
+
+.editor-empty-text {
+  font-size: 14px;
+  color: #8b949e;
+  margin: 0;
+}
+
+/* ===== LOADING STATE ===== */
+.editor-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #cccccc;
+}
+
+.editor-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #3e3e42;
+  border-top: 4px solid #0e639c;
+  border-radius: 50%;
+  animation: editorSpin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.editor-loading p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes editorSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

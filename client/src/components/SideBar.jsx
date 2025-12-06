@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { getRooms, createRoom, getUser } from "../api/api";
 
-function SideBar({ selectedRoom, setSelectedRoom }) {
+function SideBar({ selectedRoom, setSelectedRoom, setSelectedDocument }) {
   const [rooms, setRooms] = useState([]);
   const [openRoom, setOpenRoom] = useState(null);
-  const [userId, setUserId] = useState(null); 
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     async function loadRooms() {
@@ -46,7 +46,6 @@ function SideBar({ selectedRoom, setSelectedRoom }) {
       });
   };
 
-  
   useEffect(() => {
     const loadUserId = async () => {
       try {
@@ -68,53 +67,52 @@ function SideBar({ selectedRoom, setSelectedRoom }) {
       )}
 
       <ul className="room-list">
-        {rooms.map((room) => (
-          console.log("Room:", room),
-          <li
-            key={room._id}
-            className={`room-item ${
-              selectedRoom?._id === room._id ? "active" : ""
-            }`}
-          >
-            <div
-              className="room-header"
-              onClick={() => {
-                toggleRoom(room._id);
-                setSelectedRoom(room);
-              }}
-            >
-              <div>
-                <span
-                  className={`arrow ${openRoom === room._id ? "open" : ""}`}
-                >
-                  ▶
-                </span>
-                <span className="room-name">{room.name}</span>
-              </div>
- {/*
-                <button
-                  className="invite-btn"
-                  // this btn should add a document to the room
-                 onClick={(e) => {
-                    e.stopPropagation(); // prevent toggling room
-                    handleAddDocument(room);
+        {rooms.map(
+          (room) => (
+            console.log("Room:", room),
+            (
+              <li
+                key={room._id}
+                className={`room-item ${
+                  selectedRoom?._id === room._id ? "active" : ""
+                }`}
+              >
+                <div
+                  className="room-header"
+                  onClick={() => {
+                    toggleRoom(room._id);
+                    setSelectedRoom(room);
+                    setSelectedDocument(null);
                   }}
                 >
-                  +
-                </button>*/}
-            </div>
+                  <div>
+                    <span
+                      className={`arrow ${openRoom === room._id ? "open" : ""}`}
+                    >
+                      ▶
+                    </span>
+                    <span className="room-name">{room.name}</span>
+                  </div>
+                </div>
 
-            {openRoom === room._id && (
-              <ul className="document-list">
-                {room.documents.map((doc) => (
-                  <li key={doc._id} className="document-item">
-                    {doc.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
+                {openRoom === room._id && (
+                  <ul className="document-list">
+                    {room.documents.map((doc) => (
+                      <li
+                        key={doc._id}
+                        className="document-item"
+                        onClick={() => setSelectedDocument(doc)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        {doc.name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            )
+          )
+        )}
       </ul>
 
       <button className="create-room-btn" onClick={handleCreateRoom}>

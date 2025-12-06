@@ -35,6 +35,9 @@ exports.createDocument = async (req, res) => {
 
     await document.save();
 
+    room.documents.push(document._id);
+    await room.save();
+
     res.status(201).json({
       message: "Document created successfully",
       document,

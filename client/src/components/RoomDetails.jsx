@@ -1,15 +1,17 @@
 import "../../styles/roomDetails.css";
 import { useEffect, useState } from "react";
-import { getUser, updateRoomName, removeUser, inviteUser } from "../api/api";
+import { getUser } from "../api/api";
+import RoomHeader from "./RoomHeader";
+import CollaboratorsSection from "./CollaboratorsSection";
+import DocumentsSection from "./DocumentsSection";
+import RoomModal from "./RoomModal";
 
-function RoomDetails({ selectedRoom, onSelectDocument }) {
+function RoomDetails({ selectedRoom, setSelectedDocument }) {
   const [userId, setUserId] = useState(null);
   const [collaborators, setCollaborators] = useState([]);
   const [showModal, setShowModal] = useState(false);
-
-  const [modalMode, setModalMode] = useState("edit"); // "edit" | "invite"
-  const [modalValue, setModalValue] = useState("");
-  const [modalError, setModalError] = useState(""); // <== NEW error state
+  const [modalMode, setModalMode] = useState("edit-room");
+  const [modalData, setModalData] = useState({});
 
   const token = localStorage.getItem("token");
 
@@ -28,182 +30,72 @@ function RoomDetails({ selectedRoom, onSelectDocument }) {
 
   useEffect(() => {
     if (selectedRoom) {
-      setModalValue(selectedRoom.name);
+      setCollaborators(selectedRoom.collaborators);
     }
   }, [selectedRoom]);
 
   if (!selectedRoom) return null;
 
-  // Helper to display errors inside modal
-  const showError = (msg) => {
-    setModalError(msg);
-    setTimeout(() => setModalError(""), 3000); // fade after 3 sec
+  const openModal = (mode, data = {}) => {
+    setModalMode(mode);
+    setModalData(data);
+    setShowModal(true);
   };
 
-  const modal = showModal && (
-    <div className="modal-overlay">
-      <div className="modal-container">
-        <h2>
-          {modalMode === "edit" ? "Edit Room Name" : "Invite User to Room"}
-        </h2>
+  const closeModal = () => {
+    setShowModal(false);
+    setModalData({});
+  };
 
-        <input
-          type="text"
-          value={modalValue}
-          placeholder={modalMode === "edit" ? "Enter new room name" : "User ID"}
-          onChange={(e) => setModalValue(e.target.value)}
-          className="modal-input"
-        />
+  const handleModalSuccess = () => {
+    window.dispatchEvent(new Event("reloadRooms"));
+    closeModal();
+  };
 
-        {/* Error message */}
-        {modalError && <p className="modal-error">{modalError}</p>}
+  const updateCollaborators = (newCollaborators) => {
+    setCollaborators(newCollaborators);
+  };
 
-        <div className="modal-actions">
-          <button className="modal-cancel" onClick={() => setShowModal(false)}>
-            Cancel
-          </button>
 
-          <button
-            className="modal-save"
-            onClick={async () => {
-              try {
-                if (!modalValue.trim()) {
-                  showError("Field cannot be empty");
-                  return;
-                }
-
-                if (modalMode === "edit") {
-                  await updateRoomName(selectedRoom._id, modalValue, token);
-                  selectedRoom.name = modalValue;
-                } else {
-                  const res = await inviteUser(selectedRoom._id, modalValue);
-                  if (!res || !res.message) {
-                    showError("Failed to invite user");
-                    return;
-                  }
-                }
-
-                window.dispatchEvent(new Event("reloadRooms"));
-                setShowModal(false);
-              } catch (err) {
-                const msg =
-                  err?.response?.data?.message ||
-                  err?.message ||
-                  "Action failed";
-
-                showError(msg);
-                console.error(err);
-              }
-            }}
-          >
-            Save
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  useEffect(() => {
-    if (selectedRoom) {
-      setCollaborators(selectedRoom.collaborators);
-    }
-  }, [selectedRoom]);
-
-  async function handleRemoveUser(userId, roomId) {
-    try {
-      await removeUser(userId, roomId, token);
-      setCollaborators((prev) => prev.filter((u) => u._id !== userId));
-    } catch (err) {
-      console.error("Failed to remove user:", err);
-    }
-  }
-
+  
   return (
     <div className="room-details">
-      {modal}
+      <RoomHeader
+        selectedRoom={selectedRoom}
+        userId={userId}
+        onEditRoom={() => openModal("edit-room", { name: selectedRoom.name })}
+      />
 
-      {/* Room header */}
-      <div className="room-header-section">
-        <h1 className="room-name">{selectedRoom.name}</h1>
-        <p className="room-created">
-          Created on: {new Date(selectedRoom.createdAt).toLocaleDateString()}
-        </p>
+      <CollaboratorsSection
+        collaborators={collaborators}
+        selectedRoom={selectedRoom}
+        userId={userId}
+        onInvite={() => openModal("invite")}
+        onUpdateCollaborators={updateCollaborators}
+      />
 
-        {selectedRoom.owner === userId && (
-          <button
-            className="edit-room-btn"
-            onClick={() => {
-              setModalMode("edit");
-              setModalValue(selectedRoom.name);
-              setModalError("");
-              setShowModal(true);
-            }}
-          >
-            Edit Name
-          </button>
-        )}
-      </div>
+      <DocumentsSection
+        documents={selectedRoom.documents}
+        userId={userId}
+        ownerId={selectedRoom.owner}
+        onSelectDocument={setSelectedDocument}
+        onCreateDocument={() => openModal("create-document")}
+        onEditDocument={(doc) =>
+          openModal("edit-document", { id: doc._id, name: doc.name })
+        }
+        onDeleteDocument={() => window.dispatchEvent(new Event("reloadRooms"))}
+        roomId={selectedRoom._id}
+      />
 
-      {/* Members */}
-      <div className="collaborators-section">
-        <div className="members-header">
-          <h3>
-            Members:{" "}
-            {collaborators.filter((u) => u._id !== selectedRoom.owner).length}
-          </h3>
-
-          {selectedRoom.owner === userId && (
-            <button
-              className="invite-user-btn"
-              onClick={() => {
-                setModalMode("invite");
-                setModalValue("");
-                setModalError("");
-                setShowModal(true);
-              }}
-            >
-              + Invite
-            </button>
-          )}
-        </div>
-
-        <ul className="collaborators-list">
-          {collaborators
-            .filter((user) => user._id !== selectedRoom.owner)
-            .map((user) => (
-              <li key={user._id} className="collaborator-item">
-                {user.username}
-                {selectedRoom.owner === userId && (
-                  <button
-                    className="remove-user-btn"
-                    onClick={() => handleRemoveUser(user._id, selectedRoom._id)}
-                  >
-                    Remove
-                  </button>
-                )}
-              </li>
-            ))}
-        </ul>
-      </div>
-
-      {/* Documents section */}
-      <div className="documents-section">
-        <h3>Documents:</h3>
-        {selectedRoom.documents.length === 0 ? (
-          <p className="empty-docs">No documents yet. Create one!</p>
-        ) : (
-          <ul className="documents-list">
-            {selectedRoom.documents.map((doc) => (
-              <li key={doc._id} className="document-item">
-                {doc.name}
-                <button className="edit-doc-btn">Edit</button>
-                <button className="delete-doc-btn">Delete</button>
-              </li>
-            ))}
-          </ul>
-        )}
-        <button className="create-doc-btn">+ Add Document</button>
-      </div>
+      {showModal && (
+        <RoomModal
+          mode={modalMode}
+          data={modalData}
+          roomId={selectedRoom._id}
+          onClose={closeModal}
+          onSuccess={handleModalSuccess}
+        />
+      )}
     </div>
   );
 }

@@ -10,6 +10,7 @@ const roomRoutes = require('./routes/rooms');
 const userRoutes = require('./routes/userRoutes');
 const documentRoutes = require('./routes/document');
 const { Server } = require('socket.io');
+const setupDocumentSockets = require("./socketHandlers");
 
 connectDB();
 
@@ -23,6 +24,8 @@ app.use(cors({
 const io = new Server(server, {
   cors: { origin: '*' }
 });
+
+setupDocumentSockets(io);
 
 app.use(express.json());
 
