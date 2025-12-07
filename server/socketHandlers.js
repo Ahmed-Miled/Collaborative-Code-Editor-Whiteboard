@@ -188,6 +188,17 @@ function setupDocumentSockets(io) {
       await Promise.all(savePromises);
       pendingSaves.clear();
     });
+
+    socket.on("document-language-change", async ({ documentId, language }) => {
+      console.log("Language changed:", language);
+
+      await Document.findByIdAndUpdate(documentId, { language });
+
+      io.to(`document:${documentId}`).emit("document-language-updated", {
+        documentId,
+        language,
+      });
+    });
   });
 }
 
