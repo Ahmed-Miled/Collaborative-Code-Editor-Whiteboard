@@ -27,7 +27,7 @@ exports.createDocument = async (req, res) => {
     // Create document
     const document = new Document({
       name,
-      language: language || "js",
+      language: language || "javascript",
       content: content || "",
       room: roomId,
       createdBy: userId,
@@ -35,6 +35,7 @@ exports.createDocument = async (req, res) => {
 
     await document.save();
 
+    // Add document to room
     room.documents.push(document._id);
     await room.save();
 
@@ -145,6 +146,7 @@ exports.updateDocument = async (req, res) => {
     if (name !== undefined) document.name = name;
     if (language !== undefined) document.language = language;
     if (content !== undefined) document.content = content;
+    document.updatedAt = Date.now();
 
     await document.save();
 
@@ -171,7 +173,7 @@ exports.deleteDocument = async (req, res) => {
       return res.status(404).json({ message: "Document not found" });
     }
 
-    // Check if user is a member of the room or the creator
+    // Check if user is a member of the room
     const isMember = document.room.collaborators.some(
       (member) => member.toString() === userId
     );
@@ -181,6 +183,14 @@ exports.deleteDocument = async (req, res) => {
         .json({ message: "Access denied. Not a room member." });
     }
 
+    // Remove document from room's documents array
+    const room = await Room.findById(document.room._id);
+    room.documents = room.documents.filter(
+      (doc) => doc.toString() !== documentId
+    );
+    await room.save();
+
+    // Delete the document
     await Document.findByIdAndDelete(documentId);
 
     res.status(200).json({

@@ -5,44 +5,62 @@ import "../../styles/documentEditor.css";
 function DocumentEditor({ selectedDocument, socket }) {
   const [content, setContent] = useState("");
   const [language, setLanguage] = useState("javascript");
+  const [saveStatus, setSaveStatus] = useState("saved"); // saved, saving, unsaved
   const editorRef = useRef(null);
   const isRemoteChange = useRef(false);
 
   // Initialize content when document changes
   useEffect(() => {
-    if (selectedDocument) {
-      setContent(selectedDocument.content || "");
-      setLanguage(selectedDocument.language || "javascript");
+    if (selectedDocument && socket) {
+      console.log("Document selected:", selectedDocument._id);
 
-      // Join document room for real-time collaboration
-      if (socket) {
-        socket.emit("join-document", selectedDocument._id);
-      }
+      // Don't set content immediately - wait for server to send latest content
+      setSaveStatus("saved");
+
+      // Join document room and request latest content
+      socket.emit("join-document", selectedDocument._id);
+
+      // Listen for the latest document content from server
+      const handleDocumentLoaded = (data) => {
+        if (data.documentId === selectedDocument._id) {
+          console.log("Document loaded from database:", data);
+          setContent(data.content || "");
+          setLanguage(
+            data.language || selectedDocument.language || "javascript"
+          );
+        }
+      };
+
+      socket.on("document-loaded", handleDocumentLoaded);
+
+      return () => {
+        // Leave document room on cleanup
+        console.log("👋 Leaving document room:", selectedDocument._id);
+        socket.emit("leave-document", selectedDocument._id.toString());
+        socket.off("document-loaded", handleDocumentLoaded);
+      };
     }
-
-    return () => {
-      // Leave document room on cleanup
-      if (socket && selectedDocument) {
-        socket.emit("leave-document", selectedDocument._id);
-      }
-    };
   }, [selectedDocument, socket]);
 
-  // Listen for remote changes
+  // Listen for socket events
   useEffect(() => {
-    if (!socket) return;
+    if (!socket) {
+      console.warn("Socket not available");
+      return;
+    }
 
+    // Handle remote changes from other users
     const handleRemoteChange = (data) => {
-      if (data.documentId === selectedDocument?._id) {
+      console.log("📥 Received remote change:", data);
+      if (data.documentId === selectedDocument?._id.toString()) {
+        console.log("✅ Applying remote change");
         isRemoteChange.current = true;
 
-        // Preserve cursor position when applying remote changes
         const editor = editorRef.current;
         if (editor) {
           const position = editor.getPosition();
           setContent(data.content);
 
-          // Restore cursor position after content update
           setTimeout(() => {
             if (position) {
               editor.setPosition(position);
@@ -53,36 +71,82 @@ function DocumentEditor({ selectedDocument, socket }) {
           setContent(data.content);
           isRemoteChange.current = false;
         }
+      } else {
+        console.log("⚠️ Remote change for different document, ignoring");
       }
     };
 
+    // Handle auto-save confirmation
+    const handleAutoSaved = (data) => {
+      if (data.documentId === selectedDocument?._id.toString()) {
+        console.log("💾 Document auto-saved");
+        setSaveStatus("saved");
+      }
+    };
+
+    /*
+    // Handle manual save confirmation
+    const handleSaved = (data) => {
+      if (data.documentId === selectedDocument?._id.toString()) {
+        console.log("✅ Document saved:", data.message);
+        setSaveStatus("saved");
+      }
+    };
+
+    // Handle save by peer
+    const handleSavedByPeer = (data) => {
+      if (data.documentId === selectedDocument?._id.toString()) {
+        console.log("👥 Document saved by another user");
+        setSaveStatus("saved");
+      }
+    };
+*/
     socket.on("document-change", handleRemoteChange);
+    socket.on("document-auto-saved", handleAutoSaved);
+    //socket.on("document-saved", handleSaved);
+    //socket.on("document-saved-by-peer", handleSavedByPeer);
 
     return () => {
       socket.off("document-change", handleRemoteChange);
+      socket.off("document-auto-saved", handleAutoSaved);
+      //socket.off("document-saved", handleSaved);
+      //socket.off("document-saved-by-peer", handleSavedByPeer);
     };
   }, [socket, selectedDocument]);
 
   const handleEditorChange = (newValue) => {
     setContent(newValue || "");
+    setSaveStatus("unsaved");
 
-    // Only emit if this is a local change (not from remote)
+    // Only emit if this is a local change
     if (!isRemoteChange.current && socket && selectedDocument) {
+      console.log("📤 Emitting document edit for doc:", selectedDocument._id);
       socket.emit("document-edit", {
-        documentId: selectedDocument._id,
+        documentId: selectedDocument._id.toString(),
         content: newValue || "",
       });
     }
   };
 
+  /*
+  const handleManualSave = () => {
+    if (socket && selectedDocument) {
+      console.log("💾 Manual save triggered for doc:", selectedDocument._id);
+      setSaveStatus("saving");
+      socket.emit("save-document", {
+        documentId: selectedDocument._id.toString(),
+        content: content,
+      });
+    }
+  };
+*/
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
 
-    // Optional: Add custom keybindings or commands
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-      console.log("Save triggered (Ctrl+S / Cmd+S)");
-      // Implement save functionality here
-    });
+    // Add custom keybinding for save (Ctrl+S / Cmd+S)
+   // editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+     // handleManualSave();
+    //});
   };
 
   if (!selectedDocument) {
@@ -111,14 +175,53 @@ function DocumentEditor({ selectedDocument, socket }) {
     );
   }
 
+  // Save status indicator
+  const getSaveStatusText = () => {
+    switch (saveStatus) {
+      case "saved":
+        return "All changes saved";
+      case "saving":
+        return "Saving...";
+      case "unsaved":
+        return "Unsaved changes";
+      default:
+        return "";
+    }
+  };
+
+  const getSaveStatusClass = () => {
+    switch (saveStatus) {
+      case "saved":
+        return "save-status-saved";
+      case "saving":
+        return "save-status-saving";
+      case "unsaved":
+        return "save-status-unsaved";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="editor-container">
       <div className="editor-header">
         <div className="editor-title-section">
           <h2 className="editor-title">{selectedDocument.name}</h2>
           <span className="editor-language-badge">{language}</span>
+          <span className={`editor-save-status ${getSaveStatusClass()}`}>
+            {getSaveStatusText()}
+          </span>
         </div>
         <div className="editor-actions">
+          {/*
+          <button
+            className="editor-save-btn"
+            onClick={handleManualSave}
+            disabled={saveStatus === "saved"}
+          >
+            💾 Save
+          </button>
+          */}
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}

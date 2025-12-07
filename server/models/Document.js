@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const DocumentSchema = new mongoose.Schema({
   name: {
@@ -6,19 +6,28 @@ const DocumentSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  language: {
+    type: String,
+    default: "javascript",
+    trim: true,
+  },
   content: {
     type: String,
-    default: '', // File content as a string
+    default: "",
   },
   room: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Room', // The room this file belongs to
+    ref: "Room",
     required: true,
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Creator of the file
+    ref: "User",
     required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
@@ -26,9 +35,16 @@ const DocumentSchema = new mongoose.Schema({
   },
 });
 
-DocumentSchema.pre('save', function (next) {
+// Update the updatedAt field on save
+DocumentSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-module.exports = mongoose.model('Document', DocumentSchema);
+// Also update updatedAt when using findByIdAndUpdate
+DocumentSchema.pre("findOneAndUpdate", function (next) {
+  this.set({ updatedAt: Date.now() });
+  next();
+});
+
+module.exports = mongoose.model("Document", DocumentSchema);

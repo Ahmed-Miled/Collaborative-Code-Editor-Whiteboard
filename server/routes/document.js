@@ -1,11 +1,10 @@
+//routes/document.js
 const express = require("express");
 const router = express.Router();
 
 const auth = require("../middleware/auth");
 const documentController = require("../controllers/documentController");
 
-// Since this router is mounted at '/documents' in index.js,
-// these paths are relative to that base path
 
 // 1. Create a document in a room
 router.post("/rooms/:roomId", auth, documentController.createDocument);
