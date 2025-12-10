@@ -1,18 +1,26 @@
-//server / socketHandlers.js;
 const Document = require("./models/Document");
 
 // Store pending saves with debounce timers per document
 const pendingSaves = new Map();
 
+// Track active users per document: { documentId: Set<socketId> }
+const activeUsers = new Map();
+
 function setupDocumentSockets(io) {
   io.on("connection", (socket) => {
-    console.log("✅ User connected:", socket.id);
+    console.log("User connected:", socket.id);
 
     // Join a document room
     socket.on("join-document", async (documentId) => {
       try {
         socket.join(`document:${documentId}`);
-        console.log(`📄 Socket ${socket.id} joined document ${documentId}`);
+        console.log(`Socket ${socket.id} joined document ${documentId}`);
+
+        // Track this user
+        if (!activeUsers.has(documentId)) {
+          activeUsers.set(documentId, new Set());
+        }
+        activeUsers.get(documentId).add(socket.id);
 
         // Load current document from database
         const document = await Document.findById(documentId);
@@ -24,18 +32,21 @@ function setupDocumentSockets(io) {
             content: document.content || "",
             language: document.language || "javascript",
           });
-          console.log(`📤 Sent document content to ${socket.id}`);
+          console.log(`Sent document content to ${socket.id}`);
         } else {
           socket.emit("error", { message: "Document not found" });
         }
 
-        // Notify others a user joined
-        socket.to(`document:${documentId}`).emit("user-joined", {
-          socketId: socket.id,
+        // Broadcast updated user count to everyone in the room
+        const userCount = activeUsers.get(documentId).size;
+        io.to(`document:${documentId}`).emit("active-users-update", {
           documentId,
+          count: userCount,
         });
+
+        console.log(`Document ${documentId} now has ${userCount} active users`);
       } catch (error) {
-        console.error("❌ Error joining document:", error);
+        console.error("Error joining document:", error);
         socket.emit("error", { message: "Failed to join document" });
       }
     });
@@ -43,7 +54,7 @@ function setupDocumentSockets(io) {
     // Leave a document room
     socket.on("leave-document", async (documentId) => {
       try {
-        console.log(`👋 Socket ${socket.id} leaving document ${documentId}`);
+        console.log(`Socket ${socket.id} leaving document ${documentId}`);
 
         // Save any pending changes before leaving
         if (pendingSaves.has(documentId)) {
@@ -54,19 +65,31 @@ function setupDocumentSockets(io) {
             content,
             updatedAt: Date.now(),
           });
-          console.log(`💾 Auto-saved on leave: ${documentId}`);
+          console.log(`Auto-saved on leave: ${documentId}`);
           pendingSaves.delete(documentId);
         }
 
-        socket.leave(`document:${documentId}`);
+        // Remove user from tracking
+        if (activeUsers.has(documentId)) {
+          activeUsers.get(documentId).delete(socket.id);
 
-        // Notify others
-        socket.to(`document:${documentId}`).emit("user-left", {
-          socketId: socket.id,
-          documentId,
-        });
+          const userCount = activeUsers.get(documentId).size;
+
+          // Clean up if no users left
+          if (userCount === 0) {
+            activeUsers.delete(documentId);
+          }
+
+          // Broadcast updated count
+          io.to(`document:${documentId}`).emit("active-users-update", {
+            documentId,
+            count: userCount,
+          });
+        }
+
+        socket.leave(`document:${documentId}`);
       } catch (error) {
-        console.error("❌ Error leaving document:", error);
+        console.error("Error leaving document:", error);
       }
     });
 
@@ -75,7 +98,7 @@ function setupDocumentSockets(io) {
       const { documentId, content } = data;
 
       try {
-        console.log(`✏️  Edit from ${socket.id} on doc ${documentId}`);
+        console.log(`Edit from ${socket.id} on doc ${documentId}`);
 
         // Broadcast to other users immediately (real-time sync)
         socket.to(`document:${documentId}`).emit("document-change", {
@@ -84,7 +107,7 @@ function setupDocumentSockets(io) {
           socketId: socket.id,
         });
 
-        // Debounced auto-save (save 2 seconds after typing stops)
+        // Debounced auto-save (save 1 second after typing stops)
         if (pendingSaves.has(documentId)) {
           clearTimeout(pendingSaves.get(documentId).timer);
         }
@@ -96,7 +119,7 @@ function setupDocumentSockets(io) {
               updatedAt: Date.now(),
             });
 
-            console.log(`💾 Auto-saved: ${documentId}`);
+            console.log(`Auto-saved: ${documentId}`);
 
             // Notify all users (including sender)
             io.to(`document:${documentId}`).emit("document-auto-saved", {
@@ -106,66 +129,39 @@ function setupDocumentSockets(io) {
 
             pendingSaves.delete(documentId);
           } catch (error) {
-            console.error("❌ Auto-save error:", error);
+            console.error("Auto-save error:", error);
           }
-        }, 1000); // 2 seconds debounce
+        }, 1000);
 
         pendingSaves.set(documentId, { content, timer });
       } catch (error) {
-        console.error("❌ Edit handling error:", error);
+        console.error("Edit handling error:", error);
         socket.emit("error", { message: "Failed to process edit" });
       }
     });
-    /*
-    // Manual save (Ctrl+S)
-    socket.on("save-document", async (data) => {
-      const { documentId, content } = data;
 
-      try {
-        console.log(`💾 Manual save from ${socket.id} on doc ${documentId}`);
-
-        // Clear pending auto-save
-        if (pendingSaves.has(documentId)) {
-          clearTimeout(pendingSaves.get(documentId).timer);
-          pendingSaves.delete(documentId);
-        }
-
-        // Save immediately
-        const document = await Document.findByIdAndUpdate(
-          documentId,
-          { content, updatedAt: Date.now() },
-          { new: true }
-        );
-
-        if (!document) {
-          socket.emit("error", { message: "Document not found" });
-          return;
-        }
-
-        // Confirm to sender
-        socket.emit("document-saved", {
-          documentId,
-          updatedAt: document.updatedAt,
-          message: "Saved successfully",
-        });
-
-        // Notify others
-        socket.to(`document:${documentId}`).emit("document-saved-by-peer", {
-          documentId,
-          socketId: socket.id,
-          updatedAt: document.updatedAt,
-        });
-
-        console.log(`✅ Manual save complete: ${documentId}`);
-      } catch (error) {
-        console.error("❌ Save error:", error);
-        socket.emit("error", { message: "Failed to save document" });
-      }
-    });
-*/
     // Disconnect handler
     socket.on("disconnect", async () => {
-      console.log("👋 User disconnected:", socket.id);
+      console.log("User disconnected:", socket.id);
+
+      // Remove from all active documents
+      for (const [documentId, users] of activeUsers.entries()) {
+        if (users.has(socket.id)) {
+          users.delete(socket.id);
+
+          const userCount = users.size;
+
+          if (userCount === 0) {
+            activeUsers.delete(documentId);
+          }
+
+          // Broadcast updated count
+          io.to(`document:${documentId}`).emit("active-users-update", {
+            documentId,
+            count: userCount,
+          });
+        }
+      }
 
       // Save all pending changes
       const savePromises = [];
@@ -177,10 +173,7 @@ function setupDocumentSockets(io) {
             content,
             updatedAt: Date.now(),
           }).catch((err) =>
-            console.error(
-              `❌ Save on disconnect failed for ${documentId}:`,
-              err
-            )
+            console.error(`Save on disconnect failed for ${documentId}:`, err)
           )
         );
       }

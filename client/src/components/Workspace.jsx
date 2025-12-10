@@ -4,15 +4,15 @@ import RoomDetails from "../components/RoomDetails";
 import DocumentEditor from "../components/DocumentEditor";
 import { io } from "socket.io-client";
 
-function Workspace({ selectedRoom, setSelectedRoom }) {
+function Workspace({ selectedRoom, setSelectedRoom, onActiveUsersChange }) {
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [activeUsers, setActiveUsers] = useState(0);
   const socketRef = useRef(null);
 
-  // Initialize socket after component mounts (user is already authenticated)
+  // Initialize socket after component mounts
   useEffect(() => {
     console.log("🔌 Initializing socket connection...");
 
-    // Create socket connection
     socketRef.current = io("http://localhost:3001", {
       transports: ["websocket", "polling"],
       reconnection: true,
@@ -34,18 +34,25 @@ function Workspace({ selectedRoom, setSelectedRoom }) {
       console.error("🔴 Socket connection error:", error);
     });
 
-    // Cleanup on unmount
     return () => {
       console.log("🔌 Disconnecting socket...");
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
     };
-  }, []); // Only run once on mount
+  }, []);
+
+  // Handle active users change from DocumentEditor
+  const handleActiveUsersChange = (count) => {
+    setActiveUsers(count);
+    // Pass it up to HomePage if needed
+    if (onActiveUsersChange) {
+      onActiveUsersChange(count);
+    }
+  };
 
   return (
     <>
-      {/* Sidebar takes up the left column */}
       <div className="sideBar">
         <SideBar
           selectedRoom={selectedRoom}
@@ -54,7 +61,6 @@ function Workspace({ selectedRoom, setSelectedRoom }) {
         />
       </div>
 
-      {/* Main content area takes up the right column */}
       <div className="document">
         {!selectedRoom && !selectedDocument && (
           <div className="empty-room">
@@ -73,6 +79,7 @@ function Workspace({ selectedRoom, setSelectedRoom }) {
           <DocumentEditor
             selectedDocument={selectedDocument}
             socket={socketRef.current}
+            onActiveUsersChange={handleActiveUsersChange}
           />
         )}
       </div>

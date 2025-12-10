@@ -4,11 +4,11 @@ import {
   getNotifications,
   acceptInvitation,
   rejectInvitation,
-  getRooms,
 } from "../api/api";
 
-function NavBar() {
+function NavBar({ activeUsers = 0 }) {
   const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [openNotif, setOpenNotif] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
@@ -27,7 +27,7 @@ function NavBar() {
       try {
         const data = await getNotifications(token);
         setNotifications(data);
-        setHasUnread(data.length > 0); // show dot if there are notifications
+        setHasUnread(data.length > 0);
       } catch (err) {
         console.log("Failed to load notifications", err);
       }
@@ -39,6 +39,7 @@ function NavBar() {
     const interval = setInterval(loadNotifications, 500);
     return () => clearInterval(interval);
   }, []);
+
   async function handleNotifications() {
     setOpenNotif(!openNotif);
 
@@ -48,7 +49,7 @@ function NavBar() {
     }
   }
 
-  // Load username
+  // Load username and user ID
   useEffect(() => {
     async function loadUserName() {
       const token = localStorage.getItem("token");
@@ -56,6 +57,7 @@ function NavBar() {
         try {
           const data = await getUser(token);
           setUsername(data.username);
+          setUserId(data._id);
         } catch (err) {
           console.log("Failed to load username", err);
         }
@@ -63,11 +65,10 @@ function NavBar() {
     }
     loadUserName();
   }, []);
+
   async function handleRejectInvitation(roomId) {
     try {
       await rejectInvitation(roomId);
-
-      // Remove the rejected invitation locally
       setNotifications((prev) => prev.filter((n) => n.room?._id !== roomId));
     } catch (err) {
       console.log("Failed to reject invitation", err);
@@ -88,16 +89,23 @@ function NavBar() {
     <div className="navBar">
       <div className="left">
         <p className="logo">Logo</p>
-        <p className="welcome">Hello {username}</p>
+        <div className="user-info">
+          <p className="welcome">Hello {username}</p>
+          <p className="user-id">ID: {userId}</p>
+        </div>
       </div>
 
       <div className="right">
-        {/* Toggle menu on click 
-        
-        <button className="btn-outline" onClick={handleNotifications}>
-          Notifications
-        </button>
-        */}
+        {/* 🔥 NEW → Active Users Indicator */}
+        {activeUsers > 0 && (
+          <div className="active-users-indicator">
+            <span className="active-dot"></span>
+            <span className="active-count">
+              {activeUsers} {activeUsers === 1 ? "user" : "users"} viewing
+            </span>
+          </div>
+        )}
+
         <div className="notif-btn-wrapper">
           <button
             className={`btn-outline ${openNotif ? "active" : ""}`}

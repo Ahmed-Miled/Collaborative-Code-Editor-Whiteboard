@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import "../../styles/documentEditor.css";
 
-function DocumentEditor({ selectedDocument, socket }) {
+function DocumentEditor({ selectedDocument, socket, onActiveUsersChange }) {
   const [content, setContent] = useState("");
   const [language, setLanguage] = useState("javascript");
   const [saveStatus, setSaveStatus] = useState("saved");
@@ -27,11 +27,15 @@ function DocumentEditor({ selectedDocument, socket }) {
       return () => {
         socket.emit("leave-document", selectedDocument._id);
         socket.off("document-loaded", handleLoaded);
+        // Reset count when leaving
+        if (onActiveUsersChange) {
+          onActiveUsersChange(0);
+        }
       };
     }
   }, [selectedDocument, socket]);
 
-  // Socket listeners for edits + language
+  // Socket listeners for edits + language + active users
   useEffect(() => {
     if (!socket) return;
 
@@ -57,23 +61,33 @@ function DocumentEditor({ selectedDocument, socket }) {
       }
     };
 
-    // 🔥 NEW → Handle remote language updates
     const handleLanguageUpdated = (data) => {
       if (data.documentId === selectedDocument?._id) {
         setLanguage(data.language);
       }
     };
 
+    // 🔥 NEW → Handle active users update
+    const handleActiveUsersUpdate = (data) => {
+      if (data.documentId === selectedDocument?._id) {
+        if (onActiveUsersChange) {
+          onActiveUsersChange(data.count);
+        }
+      }
+    };
+
     socket.on("document-change", handleRemoteChange);
     socket.on("document-auto-saved", handleAutoSaved);
     socket.on("document-language-updated", handleLanguageUpdated);
+    socket.on("active-users-update", handleActiveUsersUpdate);
 
     return () => {
       socket.off("document-change", handleRemoteChange);
       socket.off("document-auto-saved", handleAutoSaved);
       socket.off("document-language-updated", handleLanguageUpdated);
+      socket.off("active-users-update", handleActiveUsersUpdate);
     };
-  }, [socket, selectedDocument]);
+  }, [socket, selectedDocument, onActiveUsersChange]);
 
   // Local typing handler
   const handleEditorChange = (newValue) => {
@@ -93,7 +107,7 @@ function DocumentEditor({ selectedDocument, socket }) {
     editorRef.current = editor;
   };
 
-  // 🔥 Handle language select
+  // Handle language select
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setLanguage(newLang);
